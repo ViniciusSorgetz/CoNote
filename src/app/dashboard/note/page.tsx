@@ -13,5 +13,15 @@ export default function Note() {
     fetchData();
   });
 
-  return <h2 className="text-xl font-bold text-blue-500">Salve</h2>;
+  return (
+    <div>
+      <textarea
+        className="container w-full mx-auto py-4 px-10 mt-3 border-1 border-solid border-gray-400 rounded-md"
+        rows={10}
+      />
+      <button className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-md cursor-pointer">
+        Format
+      </button>
+    </div>
+  );
 }

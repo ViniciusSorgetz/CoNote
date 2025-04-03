@@ -1,4 +1,5 @@
 import "@/app/dashboard/index.css";
+import Header from "@/components/Header";
 
 export default function RootLayout({
   children,
@@ -8,8 +9,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <h1>Online Quick Note App</h1>
-        {children}
+        <main className="container w-[1100px] max-w-[90%] mx-auto">
+          <Header />
+          {children}
+        </main>
       </body>
     </html>
   );

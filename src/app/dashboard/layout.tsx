@@ -1,5 +1,4 @@
 import "@/app/dashboard/index.css";
-
 export default function RootLayout({
   children,
 }: {
@@ -7,10 +6,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
-        <h1>Online Quick Note App</h1>
-        {children}
-      </body>
+      <head>
+        <title>CoNote</title>
+      </head>
+      <body>{children}</body>
     </html>
   );
 }

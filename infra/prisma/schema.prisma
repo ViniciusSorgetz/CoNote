@@ -13,7 +13,26 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model UserData {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  folders Folder[]
+}
+
+model Folder {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  folders      Folder[] @relation("subFolders")
+  notes        Note[]
+  UserData     UserData @relation(fields: [userDataId], references: [id])
+  userDataId   String   @db.ObjectId
+  parentFolder Folder?  @relation("subFolders", fields: [folderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  folderId     String?  @db.ObjectId
+}
+
 model Note {
-  id   String  @id @default(auto()) @map("_id") @db.ObjectId
-  name String?
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  title    String
+  content  String
+  Folder   Folder? @relation(fields: [folderId], references: [id])
+  folderId String? @db.ObjectId
 }

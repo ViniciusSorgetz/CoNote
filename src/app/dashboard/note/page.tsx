@@ -1,10 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { socket } from "@/app/socket";
+//import { useEffect, useState } from "react";
+import Sidebar from "@/components/Sidebar";
+import Main from "@/components/Main";
+//import { socket } from "@/app/socket";
 
 export default function Note() {
+  /*
   const [isConnected, setIsConnected] = useState(false);
+  const [noteContent, setNoteContent] = useState("");
 
   useEffect(() => {
     socket.connect();
@@ -12,28 +16,27 @@ export default function Note() {
     function onConnect() {
       setIsConnected(true);
     }
+    function onUpdate(formContent: string) {
+      setNoteContent(formContent);
+    }
     socket.on("connect", onConnect);
+    socket.on("update", onUpdate);
 
     return () => {
+      // removes the listener to "connect" event, 'cause it is probably already connected
       socket.off("connect", onConnect);
     };
   }, [socket]);
 
+  function handleWrite(e: React.ChangeEvent<HTMLTextAreaElement>) {
+    socket.emit("write", e.target.value);
+    setNoteContent(e.target.value);
+  }
+  */
   return (
-    <div>
-      <textarea
-        className="container w-full mx-auto py-4 px-10 mt-3 border-1 border-solid border-gray-400 rounded-md"
-        rows={10}
-      />
-      <button
-        className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-md cursor-pointer"
-        onClick={() => {
-          socket.emit("write");
-        }}
-      >
-        Write
-      </button>
-      {isConnected && <div>Connected!</div>}
+    <div className="flex h-screen">
+      <Sidebar />
+      <Main />
     </div>
   );
 }

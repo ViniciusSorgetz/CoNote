@@ -1,6 +1,4 @@
 import "@/app/dashboard/index.css";
-import Header from "@/components/Header";
-
 export default function RootLayout({
   children,
 }: {
@@ -8,12 +6,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
-        <main className="container w-[1100px] max-w-[90%] mx-auto">
-          <Header />
-          {children}
-        </main>
-      </body>
+      <head>
+        <title>CoNote</title>
+      </head>
+      <body>{children}</body>
     </html>
   );
 }

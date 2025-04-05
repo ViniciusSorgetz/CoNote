@@ -9,8 +9,8 @@ const io = new Server(httpServer, {
 });
 
 io.on("connection", (socket) => {
-  socket.on("write", () => {
-    console.log(socket.id + " is writing");
+  socket.on("write", (formContent) => {
+    io.emit("update", formContent);
   });
   console.log(socket.id);
 });

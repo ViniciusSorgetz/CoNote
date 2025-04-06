@@ -4,18 +4,17 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
-  const { title, folderId } = await req.json();
+  const { name, folderId } = await req.json();
 
   try {
-    const createdNote = await prisma.note.create({
+    const createdFolder = await prisma.folder.create({
       data: {
-        title,
-        content: "",
+        name,
         folderId,
       },
     });
 
-    return NextResponse.json({ createdNote }, { status: 201 });
+    return NextResponse.json({ createdFolder }, { status: 201 });
   } catch (error) {
     console.log(error);
     return NextResponse.json({ error }, { status: 500 });

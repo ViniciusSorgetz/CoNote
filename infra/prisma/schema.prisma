@@ -13,7 +13,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model UserData {
+model Guest {
   id      String   @id @default(auto()) @map("_id") @db.ObjectId
   folders Folder[]
 }
@@ -23,8 +23,8 @@ model Folder {
   name         String
   folders      Folder[] @relation("subFolders")
   notes        Note[]
-  UserData     UserData @relation(fields: [userDataId], references: [id])
-  userDataId   String   @db.ObjectId
+  Guest        Guest?   @relation(fields: [guestId], references: [id])
+  guestId      String?  @db.ObjectId
   parentFolder Folder?  @relation("subFolders", fields: [folderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   folderId     String?  @db.ObjectId
 }

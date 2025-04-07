@@ -3,9 +3,14 @@ import { NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function GET(_req: Request, context: any) {
-  const guestId = context.params.guestId;
+interface IParams {
+  params: {
+    guestId: string;
+  };
+}
+
+export async function GET(_req: Request, { params }: IParams) {
+  const { guestId } = await params;
 
   // find user > folders > folders > folders
   const guest = await prisma.guest.findFirst({

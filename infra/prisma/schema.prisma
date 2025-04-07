@@ -9,30 +9,30 @@ generator client {
 }
 
 datasource db {
-  provider = "mongodb"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model Guest {
-  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  id      String   @id @default(uuid())
   folders Folder[]
 }
 
 model Folder {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  id           Int      @id @default(autoincrement())
   name         String
   folders      Folder[] @relation("subFolders")
   notes        Note[]
   Guest        Guest?   @relation(fields: [guestId], references: [id])
-  guestId      String?  @db.ObjectId
+  guestId      String?
   parentFolder Folder?  @relation("subFolders", fields: [folderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  folderId     String?  @db.ObjectId
+  folderId     Int?
 }
 
 model Note {
-  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  id       Int     @id @default(autoincrement())
   title    String
   content  String
   Folder   Folder? @relation(fields: [folderId], references: [id])
-  folderId String? @db.ObjectId
+  folderId Int?
 }

@@ -2,15 +2,18 @@
   "scripts": {
     "dev": "next dev",
     "test": "concurrently --names next,jest --hide next --kill-others --success command-jest \"next dev\" \"jest\"",
-    "test:watch": "jest --watch",
+    "test:watch": "jest --watchAll",
     "eslint:check": "eslint . --ext .ts",
     "commitlint:check": "commitlint",
     "prettier:check": "prettier . --check",
     "prettier:write": "prettier . --write",
     "prepare": "husky",
-    "prisma:push": "prisma db push --schema=infra/prisma/schema.prisma",
     "prisma:generate": "prisma generate --schema=infra/prisma/schema.prisma",
-    "socket.io": "ts-node web-socket/index.ts"
+    "prisma:migrate": "prisma migrate dev --name init",
+    "socket.io": "ts-node web-socket/index.ts",
+    "services:up": "docker compose -f infra/compose.yaml up --detach",
+    "services:up-force": "docker compose -f infra/compose.yaml up --detach --force-recreate",
+    "services:down": "docker compose -f infra/compose.yaml down"
   },
   "dependencies": {
     "@prisma/client": "^6.5.0",

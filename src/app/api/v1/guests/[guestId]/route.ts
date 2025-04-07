@@ -30,6 +30,15 @@ export async function GET(_req: Request, { params }: IParams) {
     },
   });
 
+  if (!guest) {
+    return NextResponse.json(
+      { message: "User not found" },
+      {
+        status: 404,
+      },
+    );
+  }
+
   return NextResponse.json(
     { guest },
     {

@@ -1,3 +1,5 @@
 .github
 infra/generated
 infra/prisma
+src/app/components/ui
+src/lib

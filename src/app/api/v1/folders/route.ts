@@ -4,13 +4,14 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
-  const { name, folderId } = await req.json();
+  const { name, folderId, guestId } = await req.json();
 
   try {
     const createdFolder = await prisma.folder.create({
       data: {
         name,
         folderId,
+        guestId,
       },
     });
 

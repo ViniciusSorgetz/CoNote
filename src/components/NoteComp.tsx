@@ -16,11 +16,13 @@ interface IParams {
 
 export default function NoteComp({ note }: IParams) {
   const [noteTitle, setNoteTitle] = useState(note.title);
+  const [oldNoteTitle, setOldNoteTitle] = useState("");
   const [renameMode, setRenameMode] = useState(false);
   const noteInputRef = useRef<HTMLInputElement>(null);
 
   function handleRename() {
     setRenameMode(true);
+    setOldNoteTitle(noteTitle);
     setTimeout(() => noteInputRef.current?.focus(), 250);
   }
 
@@ -30,6 +32,7 @@ export default function NoteComp({ note }: IParams) {
 
   async function handleNoteInputBlur() {
     setRenameMode(false);
+    if (oldNoteTitle === noteTitle) return;
     try {
       await fetch(`/api/v1/notes/${note.id}`, {
         method: "PUT",
@@ -48,7 +51,7 @@ export default function NoteComp({ note }: IParams) {
   return (
     <ContextMenu>
       <ContextMenuTrigger>
-        <div className="flex my-2 ml-6">
+        <div className="flex my-2 ml-6 cursor-pointer">
           <img
             src={NoteIcon.src}
             alt="icon note"

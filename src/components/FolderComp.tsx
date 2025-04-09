@@ -22,6 +22,7 @@ export default function FolderItem({ folder }: IParams) {
   const [renameMode, setRenameMode] = useState(false);
   const folderInputRef = useRef<HTMLInputElement>(null);
   const [folderName, setFolderName] = useState(folder.name);
+  const [oldFolderName, setOldFolderName] = useState("");
 
   function handleFolderClick() {
     if (!renameMode) {
@@ -31,6 +32,7 @@ export default function FolderItem({ folder }: IParams) {
 
   function handleRename() {
     setRenameMode(true);
+    setOldFolderName(folderName);
     setTimeout(() => {
       folderInputRef.current?.focus();
     }, 250);
@@ -42,6 +44,7 @@ export default function FolderItem({ folder }: IParams) {
 
   async function handleFolderInputBlur() {
     setRenameMode(false);
+    if (oldFolderName === folderName) return;
     try {
       await fetch(`/api/v1/folders/${folder.id}`, {
         method: "PUT",

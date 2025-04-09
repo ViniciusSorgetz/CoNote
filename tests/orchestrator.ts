@@ -10,7 +10,9 @@ async function waitforAllServices() {
     });
 
     async function fetchStatusPage() {
-      const response = await fetch("http://localhost:3000/api/v1/status");
+      const response = await fetch(
+        "http://localhost:3000/api/v1/guests/e9af1f3e-e3a4-4f74-91f9-403951c0f0bd",
+      );
       await response.json();
     }
   }

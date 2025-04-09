@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "dev": "next dev",
-    "test": "concurrently --names next,jest --hide next --kill-others --success command-jest \"next dev\" \"jest\"",
+    "dev": "npm run services:up && next dev",
+    "test": "concurrently --names dev,jest --hide next --kill-others --success command-jest \"next dev\" \"jest\"",
     "test:watch": "jest --watchAll",
     "eslint:check": "eslint . --ext .ts",
     "commitlint:check": "commitlint",

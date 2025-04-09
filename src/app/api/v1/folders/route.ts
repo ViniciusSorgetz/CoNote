@@ -5,7 +5,6 @@ const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
   const { name, folderId, guestId } = await req.json();
-
   try {
     const createdFolder = await prisma.folder.create({
       data: {

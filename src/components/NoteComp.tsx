@@ -1,3 +1,5 @@
+"use client";
+
 import { Note } from "@/types/types";
 import NoteIcon from "@/public/note.svg";
 import {
@@ -13,18 +15,43 @@ interface IParams {
 }
 
 export default function NoteComp({ note }: IParams) {
+  const [noteTitle, setNoteTitle] = useState(note.title);
+  const [oldNoteTitle, setOldNoteTitle] = useState("");
   const [renameMode, setRenameMode] = useState(false);
   const noteInputRef = useRef<HTMLInputElement>(null);
 
   function handleRename() {
     setRenameMode(true);
-    noteInputRef.current?.focus();
+    setOldNoteTitle(noteTitle);
+    setTimeout(() => noteInputRef.current?.focus(), 250);
+  }
+
+  function handleNoteTitleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setNoteTitle(e.target.value);
+  }
+
+  async function handleNoteInputBlur() {
+    setRenameMode(false);
+    if (oldNoteTitle === noteTitle) return;
+    try {
+      await fetch(`/api/v1/notes/${note.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: noteTitle,
+        }),
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   return (
     <ContextMenu>
       <ContextMenuTrigger>
-        <div className="flex my-2 ml-6">
+        <div className="flex my-2 ml-6 cursor-pointer">
           <img
             src={NoteIcon.src}
             alt="icon note"
@@ -33,11 +60,12 @@ export default function NoteComp({ note }: IParams) {
           <input
             className={`${!renameMode && "hidden"} border border-zinc-800 py-0.5 px-2 rounded-sm w-[85%]`}
             type="text"
-            defaultValue={note.title}
+            defaultValue={noteTitle}
             ref={noteInputRef}
-            onBlur={() => setRenameMode(false)}
+            onChange={handleNoteTitleChange}
+            onBlur={handleNoteInputBlur}
           />
-          <span className={`${renameMode && "hidden"}`}>{note.title}</span>
+          <span className={`${renameMode && "hidden"}`}>{noteTitle}</span>
         </div>
       </ContextMenuTrigger>
       <ContextMenuContent className="w-64">

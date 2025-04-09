@@ -6,7 +6,9 @@
 import type { Config } from "jest";
 import nextJest from "next/jest.js";
 
-const createJestConfig = nextJest();
+const createJestConfig = nextJest({
+  dir: ".",
+});
 
 const config: Config = {
   moduleDirectories: ["node_modules", "<rootDir>"],
@@ -127,7 +129,6 @@ const config: Config = {
   // restoreMocks: false,
 
   // The root directory that Jest should scan for tests and modules within
-  // rootDir: undefined,
 
   // A list of paths to directories that Jest should use to search for files in
   // roots: [

@@ -2,7 +2,7 @@ import orchestrator from "tests/orchestrator.ts";
 
 beforeAll(async () => {
   await orchestrator.waitforAllServices();
-});
+}, 10000);
 
 describe("GET /api/v1/guest/[guestId]", () => {
   describe("Anonymous user", () => {

@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "dev": "npm run services:up && next dev",
-    "test": "concurrently --names dev,jest --hide next --kill-others --success command-jest \"next dev\" \"jest\"",
+    "dev": "npm run services:up && npm run prisma:migrate && next dev",
+    "test": "npm run services:up && sleep 5 && npm run prisma:migrate && concurrently --names dev,jest --hide next --kill-others --success command-jest \"next dev\" \"jest\"",
     "test:watch": "jest --watchAll",
     "eslint:check": "eslint . --ext .ts",
     "commitlint:check": "commitlint",
@@ -9,7 +9,7 @@
     "prettier:write": "prettier . --write",
     "prepare": "husky",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate": "dotenv -e .env.development -- npx prisma migrate dev",
     "socket.io": "ts-node web-socket/index.ts",
     "services:up": "docker compose -f infra/compose.yaml up --detach",
     "services:up-force": "docker compose -f infra/compose.yaml up --detach --force-recreate",
@@ -53,6 +53,7 @@
     "@typescript-eslint/eslint-plugin": "^8.28.0",
     "@typescript-eslint/parser": "^8.28.0",
     "concurrently": "^9.1.2",
+    "dotenv-cli": "^8.0.0",
     "eslint": "^9.23.0",
     "eslint-config-next": "15.2.4",
     "husky": "^9.1.7",

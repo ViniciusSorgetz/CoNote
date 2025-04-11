@@ -8,17 +8,25 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface IParams {
   note: Note;
+  rename?: boolean;
 }
 
-export default function NoteComp({ note }: IParams) {
-  const [noteTitle, setNoteTitle] = useState(note.title);
+export default function NoteComp({ note, rename }: IParams) {
+  const [noteTitle, setNoteTitle] = useState("");
   const [oldNoteTitle, setOldNoteTitle] = useState("");
   const [renameMode, setRenameMode] = useState(false);
   const noteInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setNoteTitle(note.title);
+    if (rename) {
+      handleRename();
+    }
+  }, []);
 
   function handleRename() {
     setRenameMode(true);

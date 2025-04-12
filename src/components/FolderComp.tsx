@@ -12,13 +12,19 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import useKeyDown from "@/utils/useKeyDown";
 
 interface IParams {
   folder: Folder;
+  updateParentFolder?: (updatedItem: Folder | Note) => void;
   rename?: boolean;
 }
 
-export default function FolderItem({ folder, rename }: IParams) {
+export default function FolderComp({
+  folder,
+  rename,
+  updateParentFolder,
+}: IParams) {
   const [showFolders, setShowFolders] = useState(false);
   const [renameMode, setRenameMode] = useState(false);
   const folderInputRef = useRef<HTMLInputElement>(null);
@@ -31,7 +37,6 @@ export default function FolderItem({ folder, rename }: IParams) {
   const [createdNote, setCreatedNote] = useState<Note>();
 
   useEffect(() => {
-    console.log(rename);
     setFolderName(folder.name);
     setNotes(folder.notes);
     if (folder.folders) {
@@ -41,6 +46,12 @@ export default function FolderItem({ folder, rename }: IParams) {
       handleRename();
     }
   }, []);
+
+  useKeyDown(() => {
+    if (renameMode) {
+      handleFolderInputBlur();
+    }
+  }, ["Enter"]);
 
   function handleFolderClick() {
     if (!renameMode) {
@@ -57,14 +68,16 @@ export default function FolderItem({ folder, rename }: IParams) {
   }
 
   function handleFolderNameChange(e: React.ChangeEvent<HTMLInputElement>) {
+    console.log(e.target.value);
     setFolderName(e.target.value);
   }
 
+  // function to save the folder's rename
   async function handleFolderInputBlur() {
     setRenameMode(false);
     if (oldFolderName === folderName) return;
     try {
-      await fetch(`/api/v1/folders/${folder.id}`, {
+      const response = await fetch(`/api/v1/folders/${folder.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -73,6 +86,10 @@ export default function FolderItem({ folder, rename }: IParams) {
           name: folderName,
         }),
       });
+      const updatedFolder = (await response.json()).updatedFolder as Folder;
+      if (updateParentFolder) {
+        updateParentFolder(updatedFolder);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -104,17 +121,18 @@ export default function FolderItem({ folder, rename }: IParams) {
       if (subFolders.length > 0) {
         for (let i = 0; i < subFolders.length; i++) {
           const name = `New Folder(${i + 1})`;
-          const found = subFolders.find((folder) => folder.name == name);
+          const found = subFolders.find((f: Folder) => f.name == name);
           if (!found) {
             return name;
           }
         }
       }
+      return "New Folder";
     }
-    return "New Folder";
   }
 
   async function createNote() {
+    const noteTitle = getNoteName();
     try {
       const response = await fetch(`/api/v1/notes`, {
         method: "POST",
@@ -122,7 +140,7 @@ export default function FolderItem({ folder, rename }: IParams) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          title: "New Note",
+          title: noteTitle,
           folderId: folder.id,
         }),
       });
@@ -132,6 +150,36 @@ export default function FolderItem({ folder, rename }: IParams) {
       setShowFolders(true);
     } catch (error) {
       console.log(error);
+    }
+
+    function getNoteName() {
+      if (notes && notes.length > 0) {
+        for (let i = 0; i < notes.length; i++) {
+          const title = `New Note(${i + 1})`;
+          const found = notes.find((n: Note) => n.title == title);
+          if (!found) {
+            return title;
+          }
+        }
+      }
+      return "New Note";
+    }
+  }
+
+  // function to a subFolder update the subFolders array which it is inside
+  function updater(updatedItem: Folder | Note) {
+    if ("name" in updatedItem) {
+      const index = subFolders.findIndex(
+        (f: Folder) => f.id === updatedItem.id,
+      );
+      const subFoldersCopy = [...subFolders];
+      subFoldersCopy[index] = updatedItem;
+      setSubFolders(subFoldersCopy);
+    } else {
+      const index = notes.findIndex((n: Note) => n.id === updatedItem.id);
+      const notesCopy = [...notes];
+      notesCopy[index] = updatedItem;
+      setNotes(notesCopy);
     }
   }
 
@@ -181,19 +229,25 @@ export default function FolderItem({ folder, rename }: IParams) {
       >
         {subFolders.length > 0 &&
           subFolders.map((folder) => {
-            if (folder.id === createdFolder?.id) {
-              return (
-                <FolderItem folder={folder} key={folder.id} rename={true} />
-              );
-            }
-            return <FolderItem folder={folder} key={folder.id} />;
+            return (
+              <FolderComp
+                folder={folder}
+                key={folder.id}
+                updateParentFolder={updater}
+                rename={folder.id === createdFolder?.id}
+              />
+            );
           })}
         {notes?.length > 0 &&
           notes.map((note) => {
-            if (note.id === createdNote?.id) {
-              return <NoteComp note={note} key={note.id} rename={true} />;
-            }
-            return <NoteComp note={note} key={note.id} />;
+            return (
+              <NoteComp
+                note={note}
+                key={note.id}
+                updateParentFolder={updater}
+                rename={note.id === createdNote?.id}
+              />
+            );
           })}
       </div>
     </div>

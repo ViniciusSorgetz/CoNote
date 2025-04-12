@@ -7,7 +7,7 @@ interface IProps {
 
 export default function Sidebar({ userData }: IProps) {
   return (
-    <div className="w-80 bg-gray-200 py-4 pr-6">
+    <div className="w-80 bg-gray-200 py-4 pr-6 overflow-y-hidden hover:overflow-y-auto">
       {userData?.folders.map((folder) => {
         return <FolderComp folder={folder} key={folder.id} />;
       })}

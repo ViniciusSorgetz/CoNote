@@ -1,6 +1,7 @@
 "use client";
 
 import { Note } from "@/types/types";
+import { Folder } from "@/types/types";
 import NoteIcon from "@/public/note.svg";
 import {
   ContextMenu,
@@ -9,13 +10,19 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { useEffect, useRef, useState } from "react";
+import useKeyDown from "@/utils/useKeyDown";
 
 interface IParams {
   note: Note;
   rename?: boolean;
+  updateParentFolder: (updatedItem: Folder | Note) => void;
 }
 
-export default function NoteComp({ note, rename }: IParams) {
+export default function NoteComp({
+  note,
+  rename,
+  updateParentFolder,
+}: IParams) {
   const [noteTitle, setNoteTitle] = useState("");
   const [oldNoteTitle, setOldNoteTitle] = useState("");
   const [renameMode, setRenameMode] = useState(false);
@@ -28,6 +35,12 @@ export default function NoteComp({ note, rename }: IParams) {
     }
   }, []);
 
+  useKeyDown(() => {
+    if (rename) {
+      handleNoteInputBlur();
+    }
+  }, ["Enter"]);
+
   function handleRename() {
     setRenameMode(true);
     setOldNoteTitle(noteTitle);
@@ -38,11 +51,12 @@ export default function NoteComp({ note, rename }: IParams) {
     setNoteTitle(e.target.value);
   }
 
+  // function to save note's rename
   async function handleNoteInputBlur() {
     setRenameMode(false);
     if (oldNoteTitle === noteTitle) return;
     try {
-      await fetch(`/api/v1/notes/${note.id}`, {
+      const response = await fetch(`/api/v1/notes/${note.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -51,6 +65,8 @@ export default function NoteComp({ note, rename }: IParams) {
           title: noteTitle,
         }),
       });
+      const updatedNote = (await response.json()).updatedNote as Note;
+      updateParentFolder(updatedNote);
     } catch (error) {
       console.log(error);
     }

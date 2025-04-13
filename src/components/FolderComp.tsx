@@ -5,7 +5,7 @@ import ArrowDown from "@/public/arrow_down.svg";
 import ArrowUp from "@/public/arrow_up.svg";
 import { Folder, Note } from "@/types/types";
 import NoteComp from "./NoteComp";
-import { useEffect, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -16,14 +16,25 @@ import useKeyDown from "@/utils/useKeyDown";
 
 interface IParams {
   folder: Folder;
-  updateParentFolder?: (updatedItem: Folder | Note) => void;
+  updateParentFolder?: (
+    updatedItem: Folder | Note,
+    action: "rename" | "delete",
+  ) => void;
   rename?: boolean;
+  openModal: () => void;
+  setDeleteFolder: Dispatch<
+    SetStateAction<{
+      delete: () => Promise<void>;
+    }>
+  >;
 }
 
 export default function FolderComp({
   folder,
   rename,
   updateParentFolder,
+  openModal,
+  setDeleteFolder,
 }: IParams) {
   const [showFolders, setShowFolders] = useState(false);
   const [renameMode, setRenameMode] = useState(false);
@@ -88,7 +99,7 @@ export default function FolderComp({
       });
       const updatedFolder = (await response.json()).updatedFolder as Folder;
       if (updateParentFolder) {
-        updateParentFolder(updatedFolder);
+        updateParentFolder(updatedFolder, "rename");
       }
     } catch (error) {
       console.log(error);
@@ -167,19 +178,40 @@ export default function FolderComp({
   }
 
   // function to a subFolder update the subFolders array which it is inside
-  function updater(updatedItem: Folder | Note) {
+  function updater(updatedItem: Folder | Note, action: "rename" | "delete") {
     if ("name" in updatedItem) {
       const index = subFolders.findIndex(
         (f: Folder) => f.id === updatedItem.id,
       );
       const subFoldersCopy = [...subFolders];
-      subFoldersCopy[index] = updatedItem;
+      if (action == "rename") {
+        subFoldersCopy[index] = updatedItem;
+      } else {
+        subFoldersCopy.splice(index, 1);
+      }
       setSubFolders(subFoldersCopy);
     } else {
       const index = notes.findIndex((n: Note) => n.id === updatedItem.id);
       const notesCopy = [...notes];
       notesCopy[index] = updatedItem;
       setNotes(notesCopy);
+    }
+  }
+
+  // function to delete a folder
+  async function deleteFolder() {
+    try {
+      await fetch(`/api/v1/folders/${folder.id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (updateParentFolder) {
+        updateParentFolder(folder, "delete");
+      }
+    } catch (error) {
+      console.log(error);
     }
   }
 
@@ -219,7 +251,17 @@ export default function FolderComp({
           <ContextMenuItem inset onClick={handleRename}>
             Rename
           </ContextMenuItem>
-          <ContextMenuItem inset>Delete</ContextMenuItem>
+          <ContextMenuItem
+            inset
+            onClick={() => {
+              openModal();
+              setDeleteFolder({
+                delete: deleteFolder,
+              });
+            }}
+          >
+            Delete
+          </ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>
       <div
@@ -233,8 +275,10 @@ export default function FolderComp({
               <FolderComp
                 folder={folder}
                 key={folder.id}
+                setDeleteFolder={setDeleteFolder}
                 updateParentFolder={updater}
                 rename={folder.id === createdFolder?.id}
+                openModal={openModal}
               />
             );
           })}

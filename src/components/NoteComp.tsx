@@ -15,7 +15,10 @@ import useKeyDown from "@/utils/useKeyDown";
 interface IParams {
   note: Note;
   rename?: boolean;
-  updateParentFolder: (updatedItem: Folder | Note) => void;
+  updateParentFolder: (
+    updatedItem: Folder | Note,
+    action: "rename" | "delete",
+  ) => void;
 }
 
 export default function NoteComp({
@@ -66,7 +69,7 @@ export default function NoteComp({
         }),
       });
       const updatedNote = (await response.json()).updatedNote as Note;
-      updateParentFolder(updatedNote);
+      updateParentFolder(updatedNote, "rename");
     } catch (error) {
       console.log(error);
     }

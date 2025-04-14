@@ -9,7 +9,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { useEffect, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import useKeyDown from "@/utils/useKeyDown";
 
 interface IParams {
@@ -19,12 +19,21 @@ interface IParams {
     updatedItem: Folder | Note,
     action: "rename" | "delete",
   ) => void;
+  setDeleter: Dispatch<
+    SetStateAction<{
+      delete: () => Promise<void>;
+      type: "folder" | "note";
+    }>
+  >;
+  openModal: () => void;
 }
 
 export default function NoteComp({
   note,
   rename,
   updateParentFolder,
+  setDeleter,
+  openModal,
 }: IParams) {
   const [noteTitle, setNoteTitle] = useState("");
   const [oldNoteTitle, setOldNoteTitle] = useState("");
@@ -75,6 +84,17 @@ export default function NoteComp({
     }
   }
 
+  async function deleteNote() {
+    try {
+      await fetch(`/api/v1/notes/${note.id}`, {
+        method: "DELETE",
+      });
+      updateParentFolder(note, "delete");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
     <ContextMenu>
       <ContextMenuTrigger>
@@ -99,7 +119,18 @@ export default function NoteComp({
         <ContextMenuItem inset onClick={handleRename}>
           Rename
         </ContextMenuItem>
-        <ContextMenuItem inset>Delete</ContextMenuItem>
+        <ContextMenuItem
+          inset
+          onClick={() => {
+            openModal();
+            setDeleter({
+              delete: deleteNote,
+              type: "note",
+            });
+          }}
+        >
+          Delete
+        </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
   );

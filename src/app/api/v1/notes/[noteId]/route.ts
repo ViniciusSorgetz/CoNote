@@ -35,3 +35,28 @@ export async function PUT(req: Request, { params }: IParams) {
     },
   );
 }
+
+// Route to delete a Note
+export async function DELETE(_req: Request, { params }: IParams) {
+  const { noteId } = await params;
+
+  const note = await prisma.note.delete({
+    where: { id: Number(noteId) },
+  });
+
+  if (!note) {
+    return NextResponse.json(
+      { message: "Note not found" },
+      {
+        status: 404,
+      },
+    );
+  }
+
+  return NextResponse.json(
+    { deletedNote: note },
+    {
+      status: 200,
+    },
+  );
+}

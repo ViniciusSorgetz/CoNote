@@ -35,3 +35,30 @@ export async function PUT(req: Request, { params }: IParams) {
     },
   );
 }
+
+// Route to delete a Folder
+export async function DELETE(_req: Request, { params }: IParams) {
+  const { folderId } = await params;
+
+  console.log(`FolderID: ${folderId}`);
+
+  const folder = await prisma.folder.delete({
+    where: { id: Number(folderId) },
+  });
+
+  if (!folder) {
+    return NextResponse.json(
+      { message: "Folder not found" },
+      {
+        status: 404,
+      },
+    );
+  }
+
+  return NextResponse.json(
+    { deletedFolder: folder },
+    {
+      status: 200,
+    },
+  );
+}

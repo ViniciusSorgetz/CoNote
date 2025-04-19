@@ -1,3 +1,5 @@
+import errorHandler from "@/app/errors/errorHandler";
+import { NotFoundError } from "@/app/errors/errors";
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
 
@@ -12,37 +14,36 @@ interface IParams {
 export async function GET(_req: Request, { params }: IParams) {
   const { guestId } = await params;
 
-  // find user > folders > folders > folders
-  const guest = await prisma.guest.findFirst({
-    where: { id: guestId },
-    include: {
-      folders: {
-        include: {
-          folders: {
-            include: {
-              folders: true,
-              notes: true,
+  try {
+    // find user > folders > folders > folders
+    const guest = await prisma.guest.findFirst({
+      where: { id: guestId },
+      include: {
+        folders: {
+          include: {
+            folders: {
+              include: {
+                folders: true,
+                notes: true,
+              },
             },
+            notes: true,
           },
-          notes: true,
         },
       },
-    },
-  });
+    });
 
-  if (!guest) {
+    if (!guest) {
+      throw new NotFoundError({ message: "User not found" });
+    }
+
     return NextResponse.json(
-      { message: "User not found" },
+      { guest },
       {
-        status: 404,
+        status: 200,
       },
     );
+  } catch (error) {
+    return errorHandler(error);
   }
-
-  return NextResponse.json(
-    { guest },
-    {
-      status: 200,
-    },
-  );
 }

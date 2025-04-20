@@ -2,6 +2,7 @@ import errorHandler from "@/app/errors/errorHandler";
 import { NotFoundError } from "@/app/errors/errors";
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { z } from "zod";
 
 const prisma = new PrismaClient();
 
@@ -11,10 +12,15 @@ interface IParams {
   };
 }
 
-export async function GET(_req: Request, { params }: IParams) {
-  const { guestId } = await params;
+const guestIdSchema = z.object({
+  guestId: z.string().uuid(),
+});
 
+// route to get guest data
+export async function GET(_req: Request, { params }: IParams) {
   try {
+    const { guestId } = guestIdSchema.parse(await params);
+
     // find user > folders > folders > folders
     const guest = await prisma.guest.findFirst({
       where: { id: guestId },

@@ -1,6 +1,8 @@
+import { ZodIssue } from "zod";
+
 export class InternalServerError extends Error {
   statusCode: number;
-  constructor(cause: unknown) {
+  constructor({ cause }: { cause: unknown }) {
     super("Something went wrong in the server", { cause });
     this.statusCode = 500;
   }
@@ -32,13 +34,28 @@ export class ServiceError extends Error {
 
 export class ValidationError extends Error {
   statusCode: number;
-  constructor({ message }: { message: string }) {
-    super(message);
+  issues?: ZodIssue[];
+  constructor({
+    message,
+    cause,
+    issues,
+  }: {
+    message: string;
+    cause?: unknown;
+    issues?: ZodIssue[];
+  }) {
+    super(message, {
+      cause: cause && cause,
+    });
     this.statusCode = 400;
+    this.issues = issues;
   }
   toJSON() {
     return {
+      error: "ValidationError",
       message: this.message,
+      action: "Please check if the request data is correct.",
+      issues: this.issues && this.issues,
       status_code: this.statusCode,
     };
   }

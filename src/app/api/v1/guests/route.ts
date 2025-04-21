@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import errorHandler from "@/app/errors/errorHandler";
 
 const prisma = new PrismaClient();
 
+// route to create a guest
 export async function POST() {
   try {
     const createdGuest = await prisma.guest.create({
@@ -34,7 +36,6 @@ export async function POST() {
 
     return NextResponse.json({ createdGuest }, { status: 201 });
   } catch (error) {
-    console.log(error);
-    return NextResponse.json({ error }, { status: 500 });
+    return errorHandler(error);
   }
 }

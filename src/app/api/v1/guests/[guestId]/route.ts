@@ -1,5 +1,8 @@
-import { PrismaClient } from "@prisma/client";
+import errorHandler from "@/app/errors/errorHandler";
+import { NotFoundError } from "@/app/errors/errors";
+import { Folder, PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
+import { z } from "zod";
 
 const prisma = new PrismaClient();
 
@@ -9,40 +12,63 @@ interface IParams {
   };
 }
 
+const guestIdSchema = z.object({
+  guestId: z.string().uuid(),
+});
+
+// route to get guest data
 export async function GET(_req: Request, { params }: IParams) {
-  const { guestId } = await params;
+  try {
+    const { guestId } = guestIdSchema.parse(await params);
 
-  // find user > folders > folders > folders
-  const guest = await prisma.guest.findFirst({
-    where: { id: guestId },
-    include: {
-      folders: {
-        include: {
-          folders: {
-            include: {
-              folders: true,
-              notes: true,
-            },
-          },
-          notes: true,
-        },
+    // find user > folders > folders > folders
+    const guest = await prisma.guest.findFirst({
+      where: { id: guestId },
+      include: {
+        folders: true,
       },
-    },
-  });
+    });
 
-  if (!guest) {
+    if (!guest) {
+      throw new NotFoundError({ message: "User not found" });
+    }
+
+    const allFolders = await Promise.all(
+      guest.folders.map(async (folder: Folder) => await getSubFolders(folder)),
+    );
+
+    async function getSubFolders(folder: Folder) {
+      const subFolders = await prisma.folder.findMany({
+        where: { folderId: folder.id },
+      });
+      const notes = await prisma.note.findMany({
+        where: { folderId: folder.id },
+      });
+
+      if (subFolders.length > 0) {
+        const allSubFolders = await Promise.all(
+          subFolders.map(
+            async (subFolder: Folder) => await getSubFolders(subFolder),
+          ),
+        );
+        const updatedFolder = {
+          ...folder,
+          folders: allSubFolders,
+          notes: notes,
+        };
+        return updatedFolder;
+      }
+
+      return { ...folder, folders: [], notes: notes };
+    }
+
     return NextResponse.json(
-      { message: "User not found" },
+      { guest: { ...guest, folders: allFolders } },
       {
-        status: 404,
+        status: 200,
       },
     );
+  } catch (error) {
+    return errorHandler(error);
   }
-
-  return NextResponse.json(
-    { guest },
-    {
-      status: 200,
-    },
-  );
 }

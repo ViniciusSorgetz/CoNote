@@ -1,12 +1,20 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import errorHandler from "@/app/errors/errorHandler";
+import { z } from "zod";
 
 const prisma = new PrismaClient();
 
+// route for creating a note
 export async function POST(req: Request) {
-  const { title, folderId } = await req.json();
+  const noteSchema = z.object({
+    title: z.string(),
+    folderId: z.number(),
+  });
 
   try {
+    const { title, folderId } = noteSchema.parse(await req.json());
+
     const createdNote = await prisma.note.create({
       data: {
         title,
@@ -17,7 +25,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ createdNote }, { status: 201 });
   } catch (error) {
-    console.log(error);
-    return NextResponse.json({ error }, { status: 500 });
+    return errorHandler(error);
   }
 }

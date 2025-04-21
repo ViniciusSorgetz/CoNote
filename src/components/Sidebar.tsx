@@ -20,7 +20,7 @@ export default function Sidebar() {
     type: "folder",
   });
 
-  const userData = useContext(UserContext);
+  const { userData } = useContext(UserContext)!;
 
   useEffect(() => {
     if (userData) {

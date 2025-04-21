@@ -19,15 +19,16 @@ const noteIdSchema = z.object({
     .transform((arg) => Number(arg)),
 });
 
-// Route to edit / rename a Note
+// Route to edit / rename / edit content of a Note
 export async function PUT(req: Request, { params }: IParams) {
-  const titleSchema = z.object({
+  const noteSchema = z.object({
     title: z.string().nonempty(),
+    content: z.optional(z.string()),
   });
 
   try {
     const { noteId } = noteIdSchema.parse(await params);
-    const { title } = titleSchema.parse(await req.json());
+    const { title, content } = noteSchema.parse(await req.json());
 
     // checks if the note exists
     const checkNote = await prisma.note.findFirst({
@@ -40,7 +41,7 @@ export async function PUT(req: Request, { params }: IParams) {
 
     const note = await prisma.note.update({
       where: { id: noteId },
-      data: { title: title },
+      data: { title: title, content: content ? content : checkNote.content },
     });
 
     return NextResponse.json(

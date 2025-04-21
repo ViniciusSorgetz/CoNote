@@ -1,47 +1,24 @@
 "use client";
 
 import { marked } from "marked";
-import { useEffect, useRef } from "react";
+import { useContext, useEffect, useRef } from "react";
 //import "highlight.js/styles/github.css";
 import hljs from "highlight.js";
+import UserContext from "@/contexts/User";
+import XIcon from "@/public/x.svg";
+import { Note } from "@/types/types";
 
 export default function Main() {
+  const { openedNotes, currentNote, setCurrentNote } = useContext(UserContext)!;
+
   const noteContentRef = useRef<HTMLDivElement>(null);
-
-  const note = {
-    content: `# Olá, mundo!
-
-Este é um pequeno **exemplo** de texto em _Markdown_.
-
-## Lista
-
-- Item 1
-- Item 2
-- Item 3
-
-\`\`\`java
-function saudacao(nome) {
-  return \`Olá, \${nome}! a aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\`;
-}
-
-console.log(saudacao("Mundo"));
-\`\`\`
-
-[Visite o site do GitHub](https://github.com)
-
-## Lista
-
-- Item 1
-- Item 2
-- Item 3
-
-`,
-  };
 
   async function insertNote() {
     setTimeout(async () => {
-      if (noteContentRef.current) {
-        noteContentRef.current.innerHTML = await marked.parse(note.content);
+      if (noteContentRef.current && currentNote) {
+        noteContentRef.current.innerHTML = await marked.parse(
+          currentNote.content,
+        );
       }
     });
   }
@@ -49,14 +26,70 @@ console.log(saudacao("Mundo"));
   useEffect(() => {
     insertNote();
     hljs.highlightAll();
-  }, []);
+  }, [currentNote]);
+
+  function closeNote(closedNote: Note) {
+    console.log(closedNote);
+    /*
+    let openedNotesCopy = [...openedNotes];
+    const index = openedNotes.findIndex(
+      (openedNote) => openedNote.id == closedNote.id,
+    );
+    openedNotesCopy = openedNotesCopy.slice(index, 1);
+    setOpenedNotes(openedNotesCopy);
+
+    if(openedNotes.length == 0){
+      setCurrentNote(undefined);
+    }
+    else{ 
+      setCurrentNote(undefined);
+    }
+    */
+  }
 
   return (
-    <div className="py-4 px-6 overflow-y-auto w-[100%]">
-      <div
-        className="note-content disabled no-tailwind prose figtree"
-        ref={noteContentRef}
-      ></div>
+    <div className="w-full">
+      <div className="flex gap-2 w-full bg-zinc-200 pl-2 pt-1">
+        {openedNotes.map((openedNote) => {
+          if (openedNote.id == currentNote?.id) {
+            return (
+              <div
+                className="cursor-pointer p-2 px-3  rounded-t-lg bg-white w-70 flex gap-2"
+                onClick={() => setCurrentNote(openedNote)}
+              >
+                {openedNote.title}
+                <img
+                  src={XIcon.src}
+                  alt="close-button"
+                  className="scale-[0.6]"
+                  onClick={() => closeNote(openedNote)}
+                />
+              </div>
+            );
+          } else {
+            return (
+              <div
+                className="cursor-pointer p-2 px-3 w-70 flex gap-2"
+                onClick={() => setCurrentNote(openedNote)}
+              >
+                {openedNote.title}
+                <img
+                  src={XIcon.src}
+                  alt="close-button"
+                  className="scale-[0.6]"
+                  onClick={() => closeNote(openedNote)}
+                />
+              </div>
+            );
+          }
+        })}
+      </div>
+      <div className="py-4 px-6 overflow-y-auto w-full">
+        <div
+          className="note-content prose figtree mt-3"
+          ref={noteContentRef}
+        ></div>
+      </div>
     </div>
   );
 }

@@ -9,8 +9,16 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import useKeyDown from "@/utils/useKeyDown";
+import UserContext from "@/contexts/User";
 
 interface IParams {
   note: Note;
@@ -35,6 +43,9 @@ export default function NoteComp({
   setDeleter,
   openModal,
 }: IParams) {
+  const { openedNotes, setOpenedNotes, currentNote, setCurrentNote } =
+    useContext(UserContext)!;
+
   const [noteTitle, setNoteTitle] = useState("");
   const [oldNoteTitle, setOldNoteTitle] = useState("");
   const [renameMode, setRenameMode] = useState(false);
@@ -95,10 +106,21 @@ export default function NoteComp({
     }
   }
 
+  function openNote() {
+    if (note.id == currentNote?.id) {
+      return;
+    }
+    const openedNote = openedNotes.find((n) => n.id == note.id);
+    if (!openedNote) {
+      setOpenedNotes((prev) => [...prev, note]);
+    }
+    setCurrentNote(note);
+  }
+
   return (
     <ContextMenu>
       <ContextMenuTrigger>
-        <div className="flex my-2 ml-6 cursor-pointer">
+        <div className="flex my-2 ml-6 cursor-pointer" onClick={openNote}>
           <img
             src={NoteIcon.src}
             alt="icon note"

@@ -4,17 +4,17 @@ export interface Guest {
 }
 
 export interface Folder {
-  id: string;
+  id: number;
   name: string;
   guestId?: string | null;
-  folderId?: string | null;
+  folderId?: number | null;
   folders: Folder[];
   notes: Note[];
 }
 
 export interface Note {
-  id: string;
+  id: number;
   title: string;
   content: string;
-  folderId: string;
+  folderId: number;
 }

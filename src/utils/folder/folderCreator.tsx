@@ -2,7 +2,7 @@ import { Folder } from "@/types/types";
 import { Dispatch, SetStateAction } from "react";
 
 interface IParams {
-  folderId?: string;
+  folderId?: number;
   guestId?: string;
   subFolders: Folder[];
   setSubFolders: Dispatch<SetStateAction<Folder[]>>;

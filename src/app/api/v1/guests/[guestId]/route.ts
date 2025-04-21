@@ -59,7 +59,7 @@ export async function GET(_req: Request, { params }: IParams) {
         return updatedFolder;
       }
 
-      return { ...folder, folders: [], notes: [] };
+      return { ...folder, folders: [], notes: notes };
     }
 
     return NextResponse.json(

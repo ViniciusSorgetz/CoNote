@@ -66,11 +66,14 @@ describe("GET /api/v1/guest/[guestId]", () => {
 
     test("Getting data from a guest that doesn't exist", async () => {
       const response3 = await fetch(
-        `http://localhost:3000/api/v1/guests/randomwords`,
+        `http://localhost:3000/api/v1/guests/b00e9661-9d46-47c0-8914-92b938321493`,
       );
       const response3Body = await response3.json();
       expect(response3Body).toEqual({
+        error: "NotFoundError",
         message: "User not found",
+        action: "Check if the request data is correct.",
+        status_code: 404,
       });
     });
   });
